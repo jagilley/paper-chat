@@ -6,22 +6,26 @@ import weaviate
 from bs4 import BeautifulSoup
 from langchain.text_splitter import CharacterTextSplitter
 
+# def clean_data(data):
+#     soup = BeautifulSoup(data)
+#     text = soup.find_all("main", {"id": "main-content"})[0].get_text()
+#     return "\n".join([t for t in text.split("\n") if t])
 
-def clean_data(data):
-    soup = BeautifulSoup(data)
-    text = soup.find_all("main", {"id": "main-content"})[0].get_text()
-    return "\n".join([t for t in text.split("\n") if t])
+# docs = []
+# metadatas = []
+# for p in Path("langchain.readthedocs.io/en/latest/").rglob("*"):
+#     if p.is_dir():
+#         continue
+#     with open(p) as f:
+#         docs.append(clean_data(f.read()))
+#         metadatas.append({"source": p})
 
+with open('paper-dir/main.txt') as f:
+    paper_text = f.read()
 
-docs = []
-metadatas = []
-for p in Path("langchain.readthedocs.io/en/latest/").rglob("*"):
-    if p.is_dir():
-        continue
-    with open(p) as f:
-        docs.append(clean_data(f.read()))
-        metadatas.append({"source": p})
-
+docs = paper_text.split("§")
+# metadatas is the first word that comes after the section symbol
+metadatas = [doc.split(" ")[0] for doc in docs]
 
 text_splitter = CharacterTextSplitter(
     separator="\n",
@@ -87,6 +91,9 @@ client.schema.create(schema)
 with client.batch as batch:
     for text in documents:
         batch.add_data_object(
-            {"content": text.page_content, "source": str(text.metadata["source"])},
+            {
+                "content": text.page_content,
+                "source": str(text.metadata["source"])
+            },
             "Paragraph",
         )

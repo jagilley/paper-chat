@@ -10,7 +10,6 @@ from chain import get_new_chain1
 
 WEAVIATE_URL = os.environ["WEAVIATE_URL"]
 
-
 def get_weaviate_store():
     client = weaviate.Client(
         url=WEAVIATE_URL,
