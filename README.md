@@ -1,4 +1,4 @@
-# ChatLangChain
+# PaperChat
 
 This repo is an implementation of a chatbot specifically focused on question answering over the [LangChain documentation](https://langchain.readthedocs.io/en/latest/).
 
