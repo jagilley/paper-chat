@@ -5,23 +5,30 @@ import gradio as gr
 import langchain
 import weaviate
 from langchain.vectorstores import Weaviate
-
+import faiss
+import pickle
 from chain import get_new_chain1
 
-WEAVIATE_URL = os.environ["WEAVIATE_URL"]
+# WEAVIATE_URL = os.environ["WEAVIATE_URL"]
 
-def get_weaviate_store():
-    client = weaviate.Client(
-        url=WEAVIATE_URL,
-        additional_headers={"X-OpenAI-Api-Key": os.environ["OPENAI_API_KEY"]},
-    )
-    return Weaviate(client, "Paragraph", "content", attributes=["source"])
+# def get_weaviate_store():
+#     client = weaviate.Client(
+#         url=WEAVIATE_URL,
+#         additional_headers={"X-OpenAI-Api-Key": os.environ["OPENAI_API_KEY"]},
+#     )
+#     return Weaviate(client, "Paragraph", "content", attributes=["source"])
 
+def get_vectorstore():
+    index = faiss.read_index("docs.index")
+    with open("faiss_store.pkl", "rb") as f:
+        store = pickle.load(f)
+    store.index = index
+    return store
 
 def set_openai_api_key(api_key, agent):
     if api_key:
         os.environ["OPENAI_API_KEY"] = api_key
-        vectorstore = get_weaviate_store()
+        vectorstore = get_vectorstore()
         qa_chain = get_new_chain1(vectorstore)
         os.environ["OPENAI_API_KEY"] = ""
         return qa_chain
@@ -46,7 +53,14 @@ block = gr.Blocks(css=".gradio-container {background-color: lightgray}")
 
 with block:
     with gr.Row():
-        gr.Markdown("<h3><center>LangChain AI</center></h3>")
+        gr.Markdown("LangChain AI")
+
+        paper_arxiv_url = gr.Textbox(
+            placeholder="Paste the URL of the paper about which you want to ask a question",
+            show_label=False,
+            lines=1,
+            type="url",
+        )
 
         openai_api_key_textbox = gr.Textbox(
             placeholder="Paste your OpenAI API key (sk-...)",

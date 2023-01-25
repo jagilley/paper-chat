@@ -19,4 +19,8 @@ store.index = index
 chain = VectorDBQAWithSourcesChain.from_llm(llm=OpenAI(temperature=0), vectorstore=store)
 result = chain({"question": args.question})
 print(f"Answer: {result['answer']}")
-print(f"Sources: {result['sources']}")
+sources = result["sources"].split(", ")
+sources = [s.title() for s in sources]
+
+import code
+code.interact(local=locals())
